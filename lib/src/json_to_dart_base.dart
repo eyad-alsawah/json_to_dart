@@ -1,22 +1,34 @@
 import 'dart:io';
 
-import 'package:json_to_dart/src/json_to_dart/helper_methods.dart';
-import 'json_to_dart/classes_to_json.dart';
-import 'json_to_dart/json_to_class.dart';
-import 'json_to_dart/json_to_dart.dart';
+import 'json_to_dart/data_classes.dart';
+import 'json_to_dart/helper_methods.dart';
 
-void convertJsonToDart({ConverterOptions? converterOptions}) async {
-  print('Enter the path to your JSON file: ');
-  final String jsonFilePath = stdin.readLineSync() ?? '';
+void main() {
+  convertJsonToDart(
+    runFormatterWhenDone: true,
+  );
+}
 
-  print('Enter the path for the output Dart file: ');
-  final String outputPath = stdin.readLineSync() ?? '';
+void convertJsonToDart(
+    {ConverterOptions? converterOptions,
+    bool runFormatterWhenDone = false}) async {
+  final Stopwatch stopwatch = Stopwatch()..start();
 
-  final File jsonFile = File(jsonFilePath);
-  final File outputFile = File(outputPath);
+  print("Enter input file name: ");
+  final String inputFileName = stdin.readLineSync() ?? 'input_json.json';
+
+  print("Enter output file name: ");
+  final String outputFileName = stdin.readLineSync() ?? 'output.dart';
+
+  print("Enter base class name: ");
+  final String baseClassName = stdin.readLineSync() ?? 'BaseClass';
+
+  final File jsonFile = File(inputFileName);
+  final File outputFile = File(outputFileName);
 
   if (!jsonFile.existsSync()) {
-    print('JSON file not found at the specified path.');
+    ColoredPrinter.printColored(
+        'JSON file not found at the specified path.', AnsiColor.red);
     return;
   }
 
@@ -28,10 +40,11 @@ void convertJsonToDart({ConverterOptions? converterOptions}) async {
   convertJsonObjectToClass(
     jsonString: jsonString,
     classesList: classesList,
-    className: 'BaseClass',
+    className: baseClassName,
   );
 
-  classesList = removeDuplicateClasses(classesList: classesList);
+  classesList =
+      removeDuplicateClasses(classesList: classesList).reversed.toList();
 
   for (var item in classesList) {
     fileToGenerate += stringClassToDart(
@@ -43,5 +56,62 @@ void convertJsonToDart({ConverterOptions? converterOptions}) async {
   }
   outputFile.writeAsString('');
   outputFile.writeAsString(fileToGenerate);
-  formatDartFile('output.dart');
+  ColoredPrinter.printColored(
+      'Generating dart classes from json completed, took ${stopwatch.elapsed.inMilliseconds}ms',
+      AnsiColor.green);
+  runFormatterWhenDone ? formatDartFile('output.dart') : null;
+}
+
+String stringClassToDart({
+  required ClassFromJson classFromJson,
+  required ConverterOptions converterOptions,
+}) {
+  if (converterOptions.constConstructor && !converterOptions.finalFields) {
+    throw "Can't define a const constructor for a class with non-final fields.";
+  }
+  String fields = '';
+  String constructor = '';
+  String params = '';
+
+  for (var field in classFromJson.classFieldsFromJson) {
+    fields =
+        '$fields${converterOptions.finalFields ? 'final ' : ''}${field.type}${converterOptions.nullableParams ? '?' : ''} ${field.name};\n';
+    params =
+        '$params${converterOptions.requiredParams ? 'required ' : ''}this.${field.name},\n';
+  }
+  //----------------------------
+  constructor =
+      '''
+${converterOptions.constConstructor ? 'const' : ''} ${converterOptions.factoryConstructor ? 'factory' : ''} ${classFromJson.className}(${converterOptions.requiredParams ? '{ ' : ''}
+                             $params
+                          ${converterOptions.requiredParams ? '}' : ''});
+''';
+//----------------------------
+  String stringClass =
+      ''' 
+    ${converterOptions.isAbstract ? 'abstract' : ''} class ${classFromJson.className} ${converterOptions.superClass.isNotEmpty ? 'extends ${converterOptions.superClass}' : ''} ${converterOptions.mixins.isNotEmpty ? converterOptions.mixins : ''}{
+                                          $fields
+                                          $constructor
+                                     }
+''';
+
+  return stringClass;
+}
+
+List<ClassFromJson> removeDuplicateClasses({
+  required List<ClassFromJson> classesList,
+}) {
+  Map<String, ClassFromJson> nonDuplicatedClassesMap = {};
+  List<ClassFromJson> nonDuplicatedClassesList = [];
+
+  classesList.asMap().forEach(
+    (index, value) {
+      nonDuplicatedClassesMap.putIfAbsent(value.className, () => value);
+    },
+  );
+
+  nonDuplicatedClassesMap.forEach((key, value) {
+    nonDuplicatedClassesList.add(value);
+  });
+  return nonDuplicatedClassesList;
 }
