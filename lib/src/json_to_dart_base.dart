@@ -12,8 +12,6 @@ void main() {
 void convertJsonToDart(
     {ConverterOptions? converterOptions,
     bool runFormatterWhenDone = false}) async {
-  final Stopwatch stopwatch = Stopwatch()..start();
-
   // the base directory of the dart/flutter project the package is imported in
   final String baseDirectory = Directory.current.path;
 
@@ -27,6 +25,7 @@ void convertJsonToDart(
   print("Enter base class name: ");
   final String baseClassName = stdin.readLineSync() ?? 'BaseClass';
 
+  final Stopwatch stopwatch = Stopwatch()..start();
   if (!baseClassName.startsWith(RegExp(r'[A-Z]'))) {
     throw "base class name isn't an UpperCamelCase identifier.";
   }
