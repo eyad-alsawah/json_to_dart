@@ -5,17 +5,26 @@ import 'json_to_dart/helper_methods.dart';
 
 void main() {
   convertJsonToDart(
+    baseClassName: 'EyadModel',
+    inputFileName: 'input_json.json',
+    outputFileName: 'output.dart',
     runFormatterWhenDone: true,
   );
 }
 
 void convertJsonToDart(
-    {ConverterOptions? converterOptions,
+    {required String inputFileName,
+    required String outputFileName,
+    required String baseClassName,
+    ConverterOptions? converterOptions,
     bool runFormatterWhenDone = false}) async {
   final Stopwatch stopwatch = Stopwatch()..start();
 
+  // the base directory of the dart/flutter project the package is imported in
+  final String baseDirectory = Directory.current.path;
+
   print("Enter input file name: ");
-  final String inputFileName = stdin.readLineSync() ?? 'input_json.json';
+  final String inputFileName = stdin.readLineSync() ?? 'input.json';
 
   print("Enter output file name: ");
   final String outputFileName = stdin.readLineSync() ?? 'output.dart';
@@ -23,8 +32,8 @@ void convertJsonToDart(
   print("Enter base class name: ");
   final String baseClassName = stdin.readLineSync() ?? 'BaseClass';
 
-  final File jsonFile = File(inputFileName);
-  final File outputFile = File(outputFileName);
+  final File jsonFile = File('$baseDirectory/$inputFileName');
+  final File outputFile = File('$baseDirectory$outputFileName');
 
   if (!jsonFile.existsSync()) {
     ColoredPrinter.printColored(
