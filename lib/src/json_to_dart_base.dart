@@ -12,8 +12,8 @@ void convertJsonToDart(
     {required String jsonFilePath,
     required String outputPath,
     ConverterOptions? converterOptions}) async {
-  final File jsonFile = File('input_json.json');
-  final File outputFile = File('output.dart');
+  final File jsonFile = File(jsonFilePath);
+  final File outputFile = File(outputPath);
   final jsonString = await jsonFile.readAsString();
 
   String fileToGenerate = '';
