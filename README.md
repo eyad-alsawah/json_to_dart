@@ -1,39 +1,29 @@
-<!-- 
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
-
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/guides/libraries/writing-package-pages). 
-
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-library-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/developing-packages). 
--->
-
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
-
 ## Features
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
+Takes a json file as its input and converts them to dart class.
+The generated classes can be configured (required/null params, const/factory constructors ....etc)
 
 ## Getting started
 
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
+In your pubspec.yaml file, add this under dependencies:
+ ```bash
+  json_to_dart:
+    git:
+      url: https://github.com/eyad-alsawah/json_to_dart.git
+```
 
 ## Usage
 
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder. 
+Follow these steps to use this method:
 
-```dart
-const like = 'sample';
-```
+1. **Add a JSON File**
 
-## Additional information
+   Place the JSON file you want to convert in the same directory as the file where you intend to use this method.
 
-TODO: Tell users more about the package: where to find more information, how to 
-contribute to the package, how to file issues, what response they can expect 
-from the package authors, and more.
+2. **Run the Conversion Script**
+
+   In your terminal or command prompt, execute the following command to run the script in the context of the file where this method is called:
+
+   ```bash
+   dart run replace_with_path_to_file_where_this_method_is_called.dart
+
