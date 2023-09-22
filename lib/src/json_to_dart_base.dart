@@ -9,6 +9,21 @@ void main() {
   );
 }
 
+/// ## Usage:
+///
+/// 1. **Add a JSON File**
+///
+///    Place the JSON file you want to convert into the same directory as the file where you are using this method.
+///
+/// 2. **Run the Conversion Script**
+///
+///    In your terminal or command prompt, run the following command to execute
+///    the `file_where_this_method_is_called.dart` program:
+///
+///    ```
+///    dart run replace_with_path_to_file_where_this_method_is_called.dart
+///    ```
+///
 void convertJsonToDart(
     {ConverterOptions? converterOptions,
     bool runFormatterWhenDone = false}) async {
