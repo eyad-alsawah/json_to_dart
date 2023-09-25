@@ -5,8 +5,10 @@ import 'json_to_dart/helper_methods.dart';
 
 void main() {
   convertJsonToDart(
-    runFormatterWhenDone: true,
-  );
+      runFormatterWhenDone: true,
+      runBuildRunnerWhenDone: true,
+      converterOptions: ConverterOptions(
+          compatibleLibrary: CompatibleLibrary.jsonSerializable));
 }
 
 /// ## Usage:
