@@ -25,6 +25,7 @@ class ConverterOptions {
   final bool finalFields;
   final bool factoryConstructor;
   final bool constConstructor;
+  final bool equatable;
   final String mixins;
   final String superClass;
   final CompatibleLibrary? compatibleLibrary;
@@ -36,6 +37,7 @@ class ConverterOptions {
     this.finalFields = false,
     this.factoryConstructor = false,
     this.constConstructor = false,
+    this.equatable = false,
     this.mixins = '',
     this.superClass = '',
     this.compatibleLibrary,

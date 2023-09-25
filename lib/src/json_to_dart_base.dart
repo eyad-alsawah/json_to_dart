@@ -5,10 +5,8 @@ import 'json_to_dart/helper_methods.dart';
 
 void main() {
   convertJsonToDart(
-      runFormatterWhenDone: true,
-      runBuildRunnerWhenDone: true,
-      converterOptions: ConverterOptions(
-          compatibleLibrary: CompatibleLibrary.jsonSerializable));
+    runFormatterWhenDone: true,
+  );
 }
 
 /// ## Usage:
@@ -123,7 +121,8 @@ String stringClassToDart({
   String classAnnotation = '';
   String fromJson = '';
   String toJson = '';
-
+  String classMixin = '';
+  String equatableProps = '';
   for (var field in classFromJson.classFieldsFromJson) {
     String fieldPrefix = getFieldPrefix(
         field: field, library: converterOptions.compatibleLibrary);
@@ -131,17 +130,36 @@ String stringClassToDart({
         '$fields$fieldPrefix ${converterOptions.finalFields ? 'final ' : ''}${field.type}${converterOptions.nullableParams ? '?' : ''} ${field.name};\n';
     String paramPrefix = getParamPrefix(
         field: field, library: converterOptions.compatibleLibrary);
-    params =
-        '$params$paramPrefix ${converterOptions.requiredParams ? 'required ' : ''}this.${field.name},\n';
+
+    if (converterOptions.compatibleLibrary != null) {
+      fields = converterOptions.compatibleLibrary == CompatibleLibrary.freezed
+          ? ''
+          : fields;
+      params = converterOptions.compatibleLibrary == CompatibleLibrary.freezed
+          ? '$params $paramPrefix ${field.type} ${field.name},\n'
+          : '$params$paramPrefix ${converterOptions.requiredParams ? 'required ' : ''}this.${field.name},\n';
+
+      if (converterOptions.equatable) {
+        equatableProps += field.name;
+      }
+    } else {
+      params =
+          '$params$paramPrefix ${converterOptions.requiredParams ? 'required ' : ''}this.${field.name},\n';
+    }
   }
+
   //----------------------------
+
   constructor = '''
-${converterOptions.constConstructor ? 'const' : ''} ${converterOptions.factoryConstructor ? 'factory' : ''} ${classFromJson.className}(${converterOptions.requiredParams ? '{ ' : ''}
+${converterOptions.constConstructor ? 'const' : ''} ${converterOptions.factoryConstructor ? 'factory' : ''} ${classFromJson.className}(${(converterOptions.requiredParams || (converterOptions.compatibleLibrary != null && converterOptions.compatibleLibrary == CompatibleLibrary.freezed)) ? '{ ' : ''}
                              $params
-                          ${converterOptions.requiredParams ? '}' : ''});
+                          ${(converterOptions.requiredParams || (converterOptions.compatibleLibrary != null && converterOptions.compatibleLibrary == CompatibleLibrary.freezed)) ? '}' : ''}) ${converterOptions.compatibleLibrary == CompatibleLibrary.freezed ? '= _${classFromJson.className}' : ''};
 ''';
 //----------------------------
   if (converterOptions.compatibleLibrary != null) {
+    fields = converterOptions.compatibleLibrary == CompatibleLibrary.freezed
+        ? ''
+        : fields;
     classAnnotation =
         converterOptions.compatibleLibrary == CompatibleLibrary.jsonSerializable
             ? '@JsonSerializable()'
@@ -157,17 +175,23 @@ ${converterOptions.constConstructor ? 'const' : ''} ${converterOptions.factoryCo
 Map<String, dynamic> toJson() => _\$${classFromJson.className}ToJson(this);
 '''
             : '';
+
+    classMixin = converterOptions.compatibleLibrary == CompatibleLibrary.freezed
+        ? 'with _\$${classFromJson.className}'
+        : '';
   }
 
   String stringClass = ''' 
     $classAnnotation
-    ${converterOptions.isAbstract ? 'abstract' : ''} class ${classFromJson.className} ${converterOptions.superClass.isNotEmpty ? 'extends ${converterOptions.superClass}' : ''} ${converterOptions.mixins.isNotEmpty ? converterOptions.mixins : ''}{
+    ${converterOptions.isAbstract ? 'abstract' : ''} class ${classFromJson.className} ${converterOptions.superClass.isNotEmpty ? 'extends ${converterOptions.superClass}' : ''} ${converterOptions.mixins.isNotEmpty ? converterOptions.mixins : classMixin.isNotEmpty ? classMixin : ''}{
                                           $fields
                                           $constructor
                                           
                                           $fromJson
 
                                           $toJson
+
+                                          $equatableProps
                                      }
 ''';
 

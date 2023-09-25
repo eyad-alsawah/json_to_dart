@@ -1,7 +1,4 @@
-import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
-import 'dart:io';
 import 'dart:io';
 
 import 'package:json_to_dart/src/json_to_dart/string_extensions.dart';
@@ -89,7 +86,7 @@ void runBuildRunner() {
       stopwatch.stop();
       if (result.exitCode == 0) {
         ColoredPrinter.printColored(
-            'build_runner build completed successfully in ${stopwatch.elapsed}',
+            'build_runner build completed successfully, took ${stopwatch.elapsed.inMilliseconds}ms',
             AnsiColor.green);
       } else {
         ColoredPrinter.printColored(
