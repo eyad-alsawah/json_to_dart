@@ -4,5 +4,6 @@
 library;
 
 export 'src/json_to_dart_base.dart';
-export 'src/json_to_dart/data_classes.dart' show ConverterOptions;
+export 'src/json_to_dart/data_classes.dart'
+    show ConverterOptions, CompatibleLibrary;
 // TODO: Export any libraries intended for clients of this package.
