@@ -71,13 +71,10 @@ void formatDartFile(String filePath) {
 }
 
 void runBuildRunner() {
-  // Get the current directory
-  final currentDirectory = Directory.current;
-  // Define the lib directory path
-  final libDirectory = Directory(path.join(currentDirectory.path, 'lib'));
+  final String? rootDirectory = getRootProjectDirectory();
 
   Process.run('dart', ['run', 'build_runner', 'build'],
-          workingDirectory: libDirectory.path)
+          workingDirectory: rootDirectory)
       .then((result) {
     if (result.exitCode == 0) {
       ColoredPrinter.printColored(
@@ -175,4 +172,31 @@ class ColoredPrinter {
       print('Unknown color: $color');
     }
   }
+}
+
+String? getRootProjectDirectory() {
+  final currentDirectory = Directory.current;
+  final rootDirectory = findRootDirectory(currentDirectory);
+
+  if (rootDirectory != null) {
+    print('Root Project Directory: $rootDirectory');
+  } else {
+    print('Unable to find the root project directory.');
+  }
+  return rootDirectory;
+}
+
+String? findRootDirectory(Directory directory) {
+  final separator = path.separator;
+  final parts = path.split(directory.path);
+
+  for (int i = parts.length - 1; i >= 0; i--) {
+    if (parts[i] == 'lib') {
+      // When 'lib' directory is found, stop and return the parent directory
+      return path.joinAll(parts.sublist(0, i));
+    }
+  }
+
+  // If 'lib' directory is not found in the path, return null
+  return null;
 }

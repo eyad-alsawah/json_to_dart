@@ -5,9 +5,8 @@ import 'json_to_dart/helper_methods.dart';
 
 void main() {
   convertJsonToDart(
-      runFormatterWhenDone: true,
-      converterOptions: ConverterOptions(
-          compatibleLibrary: CompatibleLibrary.jsonSerializable));
+    runFormatterWhenDone: true,
+  );
 }
 
 /// ## Usage:
