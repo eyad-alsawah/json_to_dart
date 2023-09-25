@@ -1,4 +1,7 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
+import 'dart:io';
 import 'dart:io';
 
 import 'package:json_to_dart/src/json_to_dart/string_extensions.dart';
@@ -72,18 +75,32 @@ void formatDartFile(String filePath) {
 
 void runBuildRunner() {
   final String? rootDirectory = getRootProjectDirectory();
+  print(rootDirectory);
 
-  Process.run('dart', ['run', 'build_runner', 'build'],
-          workingDirectory: rootDirectory)
-      .then((result) {
-    if (result.exitCode == 0) {
-      ColoredPrinter.printColored(
-          'build_runner build completed successfully.', AnsiColor.green);
-    } else {
-      ColoredPrinter.printColored(
-          'build_runner build failed. Error: ${result.stderr}', AnsiColor.red);
-    }
-  });
+  if (rootDirectory != null) {
+    final stopwatch = Stopwatch()..start();
+
+    Process.run('dart', ['run', 'build_runner', 'build'],
+            workingDirectory: rootDirectory)
+        .then((ProcessResult result) {
+      print(result.stdout); // Print the standard output from the process.
+      print(result.stderr); // Print the standard error from the process.
+
+      stopwatch.stop();
+      if (result.exitCode == 0) {
+        ColoredPrinter.printColored(
+            'build_runner build completed successfully in ${stopwatch.elapsed}',
+            AnsiColor.green);
+      } else {
+        ColoredPrinter.printColored(
+            'build_runner build failed. Error: ${stopwatch.elapsed}',
+            AnsiColor.red);
+      }
+    });
+  } else {
+    ColoredPrinter.printColored(
+        'Unable to find the root project directory.', AnsiColor.red);
+  }
 }
 
 List<ClassFromJson> removeDuplicateClasses({
