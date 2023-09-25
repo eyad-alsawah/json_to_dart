@@ -5,8 +5,9 @@ import 'json_to_dart/helper_methods.dart';
 
 void main() {
   convertJsonToDart(
-    runFormatterWhenDone: true,
-  );
+      runFormatterWhenDone: true,
+      converterOptions: ConverterOptions(
+          compatibleLibrary: CompatibleLibrary.jsonSerializable));
 }
 
 /// ## Usage:
@@ -26,7 +27,8 @@ void main() {
 ///
 void convertJsonToDart(
     {ConverterOptions? converterOptions,
-    bool runFormatterWhenDone = false}) async {
+    bool runFormatterWhenDone = false,
+    bool runBuildRunnerWhenDone = false}) async {
   // the base directory of the dart/flutter project the package is imported in
   final String baseDirectory = Directory.current.path;
 
@@ -57,7 +59,22 @@ void convertJsonToDart(
   final jsonString = await jsonFile.readAsString();
 
   String fileToGenerate = '';
+  String libraryImports = '';
+  String partsImports = '';
+  if (converterOptions != null && converterOptions.compatibleLibrary != null) {
+    libraryImports =
+        converterOptions.compatibleLibrary == CompatibleLibrary.freezed
+            ? "import 'package:freezed_annotation/freezed_annotation.dart';"
+            : "import 'package:json_annotation/json_annotation.dart';";
 
+    partsImports =
+        converterOptions.compatibleLibrary == CompatibleLibrary.freezed
+            ? '''
+        part '${outputFileName.replaceAll('.dart', '.freezed.dart')}';
+        part '${outputFileName.replaceAll('.dart', '.g.dart')}';
+          '''
+            : "part '${outputFileName.replaceAll('.dart', '.g.dart')}';";
+  }
   List<ClassFromJson> classesList = [];
   convertJsonObjectToClass(
     jsonString: jsonString,
@@ -68,6 +85,9 @@ void convertJsonToDart(
   classesList =
       removeDuplicateClasses(classesList: classesList).reversed.toList();
 
+  fileToGenerate += libraryImports;
+  fileToGenerate += partsImports;
+
   for (var item in classesList) {
     fileToGenerate += stringClassToDart(
       classFromJson: item,
@@ -76,6 +96,7 @@ void convertJsonToDart(
               constConstructor: true, finalFields: true, requiredParams: true),
     );
   }
+
   outputFile.writeAsString('');
   outputFile
       .writeAsString(fileToGenerate)
@@ -85,6 +106,7 @@ void convertJsonToDart(
       'Generating dart classes from json completed, took ${stopwatch.elapsed.inMilliseconds}ms',
       AnsiColor.green);
   runFormatterWhenDone ? formatDartFile(outputFileName) : null;
+  runBuildRunnerWhenDone ? runBuildRunner() : null;
 }
 
 String stringClassToDart({
@@ -97,26 +119,54 @@ String stringClassToDart({
   String fields = '';
   String constructor = '';
   String params = '';
+  String classAnnotation = '';
+  String fromJson = '';
+  String toJson = '';
 
   for (var field in classFromJson.classFieldsFromJson) {
+    String fieldPrefix = getFieldPrefix(
+        field: field, library: converterOptions.compatibleLibrary);
     fields =
-        '$fields${converterOptions.finalFields ? 'final ' : ''}${field.type}${converterOptions.nullableParams ? '?' : ''} ${field.name};\n';
+        '$fields$fieldPrefix ${converterOptions.finalFields ? 'final ' : ''}${field.type}${converterOptions.nullableParams ? '?' : ''} ${field.name};\n';
+    String paramPrefix = getParamPrefix(
+        field: field, library: converterOptions.compatibleLibrary);
     params =
-        '$params${converterOptions.requiredParams ? 'required ' : ''}this.${field.name},\n';
+        '$params$paramPrefix ${converterOptions.requiredParams ? 'required ' : ''}this.${field.name},\n';
   }
   //----------------------------
-  constructor =
-      '''
+  constructor = '''
 ${converterOptions.constConstructor ? 'const' : ''} ${converterOptions.factoryConstructor ? 'factory' : ''} ${classFromJson.className}(${converterOptions.requiredParams ? '{ ' : ''}
                              $params
                           ${converterOptions.requiredParams ? '}' : ''});
 ''';
 //----------------------------
-  String stringClass =
-      ''' 
+  if (converterOptions.compatibleLibrary != null) {
+    classAnnotation =
+        converterOptions.compatibleLibrary == CompatibleLibrary.jsonSerializable
+            ? '@JsonSerializable()'
+            : ' @freezed';
+
+    fromJson =
+        '''factory ${classFromJson.className}.fromJson(Map<String, dynamic> json) =>
+      _\$${classFromJson.className}FromJson(json);''';
+
+    toJson =
+        converterOptions.compatibleLibrary == CompatibleLibrary.jsonSerializable
+            ? '''
+Map<String, dynamic> toJson() => _\$${classFromJson.className}ToJson(this);
+'''
+            : '';
+  }
+
+  String stringClass = ''' 
+    $classAnnotation
     ${converterOptions.isAbstract ? 'abstract' : ''} class ${classFromJson.className} ${converterOptions.superClass.isNotEmpty ? 'extends ${converterOptions.superClass}' : ''} ${converterOptions.mixins.isNotEmpty ? converterOptions.mixins : ''}{
                                           $fields
                                           $constructor
+                                          
+                                          $fromJson
+
+                                          $toJson
                                      }
 ''';
 
@@ -139,4 +189,57 @@ List<ClassFromJson> removeDuplicateClasses({
     nonDuplicatedClassesList.add(value);
   });
   return nonDuplicatedClassesList;
+}
+
+//-----------------------
+String getFieldPrefix(
+    {required CompatibleLibrary? library, required ClassFieldFromJson field}) {
+  String fieldPrefix = '';
+  switch (library) {
+    case CompatibleLibrary.jsonSerializable:
+      fieldPrefix = "@JsonKey(name:'${field.jsonKey}')";
+    case CompatibleLibrary.freezed:
+      fieldPrefix = '';
+      break;
+    default:
+      fieldPrefix = '';
+  }
+  return fieldPrefix;
+}
+
+String getParamPrefix(
+    {required ClassFieldFromJson field, CompatibleLibrary? library}) {
+  getDefaultValueFromType(fieldType: field.type);
+  String paramPrefix = '';
+  switch (library) {
+    case CompatibleLibrary.jsonSerializable:
+      paramPrefix = '';
+    case CompatibleLibrary.freezed:
+      paramPrefix =
+          '@Default(${getDefaultValueFromType(fieldType: field.type)})';
+      break;
+    default:
+      paramPrefix = '';
+  }
+  return paramPrefix;
+}
+
+String getDefaultValueFromType({required String fieldType}) {
+  String defaultFieldValue = '';
+
+  switch (fieldType) {
+    case 'int':
+      defaultFieldValue = '0';
+      break;
+    case 'double':
+      defaultFieldValue = '0.0';
+      break;
+    case 'String':
+      defaultFieldValue = "''";
+      break;
+    default:
+      // todo: see if there is a better way to handle default values for objects
+      defaultFieldValue = fieldType.contains('List') ? '[]' : 'null';
+  }
+  return defaultFieldValue;
 }

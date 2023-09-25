@@ -31,13 +31,13 @@ void convertJsonObjectToClass({
         // here get the first element type --> List<int>
         String listItemType =
             getListItemType(list: value, key: key, classesList: classesList);
-        fieldFromJson =
-            ClassFieldFromJson(type: listItemType, name: key.toCamelCase());
+        fieldFromJson = ClassFieldFromJson(
+            type: listItemType, name: key.toCamelCase(), jsonKey: key);
         break;
       case '_Map<String, dynamic>':
         String innerJsonObject = json.encode(value);
         fieldFromJson = ClassFieldFromJson(
-            type: key.toPascalCase(), name: key.toCamelCase());
+            type: key.toPascalCase(), name: key.toCamelCase(), jsonKey: key);
         convertJsonObjectToClass(
           jsonString: innerJsonObject,
           classesList: classesList,
@@ -46,8 +46,8 @@ void convertJsonObjectToClass({
         break;
 
       default:
-        fieldFromJson =
-            ClassFieldFromJson(type: valueType, name: key.toCamelCase());
+        fieldFromJson = ClassFieldFromJson(
+            type: valueType, name: key.toCamelCase(), jsonKey: key);
     }
     classFields.add(fieldFromJson);
   });

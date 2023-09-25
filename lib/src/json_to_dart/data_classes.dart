@@ -10,9 +10,11 @@ class ClassFromJson {
 class ClassFieldFromJson {
   String type;
   String name;
+  String jsonKey;
   ClassFieldFromJson({
     required this.type,
     required this.name,
+    required this.jsonKey,
   });
 }
 
@@ -25,6 +27,7 @@ class ConverterOptions {
   final bool constConstructor;
   final String mixins;
   final String superClass;
+  final CompatibleLibrary? compatibleLibrary;
 
   ConverterOptions({
     this.requiredParams = false,
@@ -35,6 +38,12 @@ class ConverterOptions {
     this.constConstructor = false,
     this.mixins = '',
     this.superClass = '',
+    this.compatibleLibrary,
   }) : assert(constConstructor && !finalFields,
             "Can't define a const constructor for a class with non-final fields.");
+}
+
+enum CompatibleLibrary {
+  jsonSerializable,
+  freezed,
 }
