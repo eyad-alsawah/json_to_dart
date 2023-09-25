@@ -5,6 +5,8 @@ import 'package:json_to_dart/src/json_to_dart/string_extensions.dart';
 
 import 'data_classes.dart';
 
+import 'package:path/path.dart' as path;
+
 void convertJsonObjectToClass({
   required String jsonString,
   required List<ClassFromJson> classesList,
@@ -69,7 +71,14 @@ void formatDartFile(String filePath) {
 }
 
 void runBuildRunner() {
-  Process.run('dart', ['run', 'build_runner', 'build']).then((result) {
+  // Get the current directory
+  final currentDirectory = Directory.current;
+  // Define the lib directory path
+  final libDirectory = Directory(path.join(currentDirectory.path, 'lib'));
+
+  Process.run('dart', ['run', 'build_runner', 'build'],
+          workingDirectory: libDirectory.path)
+      .then((result) {
     if (result.exitCode == 0) {
       ColoredPrinter.printColored(
           'build_runner build completed successfully.', AnsiColor.green);
