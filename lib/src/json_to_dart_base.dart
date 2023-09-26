@@ -128,7 +128,7 @@ String stringClassToDart({
     String fieldPrefix = getFieldPrefix(
         field: field, library: converterOptions.compatibleLibrary);
     fields =
-        '$fields$fieldPrefix ${converterOptions.finalFields ? 'final ' : ''}${field.type}${fieldIsClass(fieldType: field.type) ? converterOptions.classNamePostfix : ''}${converterOptions.nullableParams ? '?' : ''} ${field.name};\n';
+        '$fields$fieldPrefix ${converterOptions.finalFields ? 'final ' : ''}${field.type}${fieldIsNotAClass(fieldType: field.type) ? '' : converterOptions.classNamePostfix}${converterOptions.nullableParams ? '?' : ''} ${field.name};\n';
     String paramPrefix = getParamPrefix(
         field: field, library: converterOptions.compatibleLibrary);
 
@@ -159,7 +159,7 @@ String stringClassToDart({
   constructor = '''
 ${converterOptions.constConstructor ? 'const' : ''} ${converterOptions.factoryConstructor ? 'factory' : ''} ${classFromJson.className}${converterOptions.classNamePostfix}(${(converterOptions.requiredParams || (converterOptions.compatibleLibrary != null && converterOptions.compatibleLibrary == CompatibleLibrary.freezed)) ? '{ ' : ''}
                              $params
-                          ${(converterOptions.requiredParams || (converterOptions.compatibleLibrary != null && converterOptions.compatibleLibrary == CompatibleLibrary.freezed)) ? '}' : ''}) ${converterOptions.compatibleLibrary == CompatibleLibrary.freezed ? '= _${classFromJson.className}' : ''};
+                          ${(converterOptions.requiredParams || (converterOptions.compatibleLibrary != null && converterOptions.compatibleLibrary == CompatibleLibrary.freezed)) ? '}' : ''}) ${converterOptions.compatibleLibrary == CompatibleLibrary.freezed ? '= _${classFromJson.className}${converterOptions.classNamePostfix}' : ''};
 ''';
 //----------------------------
   if (converterOptions.compatibleLibrary != null) {
@@ -172,18 +172,18 @@ ${converterOptions.constConstructor ? 'const' : ''} ${converterOptions.factoryCo
             : ' @freezed';
 
     fromJson =
-        '''factory ${classFromJson.className}.fromJson(Map<String, dynamic> json) =>
-      _\$${classFromJson.className}FromJson(json);''';
+        '''factory ${classFromJson.className}${converterOptions.classNamePostfix}.fromJson(Map<String, dynamic> json) =>
+      _\$${classFromJson.className}${converterOptions.classNamePostfix}FromJson(json);''';
 
     toJson =
         converterOptions.compatibleLibrary == CompatibleLibrary.jsonSerializable
             ? '''
-Map<String, dynamic> toJson() => _\$${classFromJson.className}ToJson(this);
+Map<String, dynamic> toJson() => _\$${classFromJson.className}${converterOptions.classNamePostfix}ToJson(this);
 '''
             : '';
 
     classMixin = converterOptions.compatibleLibrary == CompatibleLibrary.freezed
-        ? 'with _\$${classFromJson.className}'
+        ? 'with _\$${classFromJson.className}${converterOptions.classNamePostfix}'
         : '';
   }
 
@@ -277,7 +277,7 @@ String getDefaultValueFromType({required String fieldType}) {
   return defaultFieldValue;
 }
 
-bool fieldIsClass({required String fieldType}) {
-  return (['int, double, bool, dynamic, String']
-      .any((element) => fieldType != element));
+bool fieldIsNotAClass({required String fieldType}) {
+  return (['int', 'double', 'bool', 'dynamic', 'String']
+      .any((element) => fieldType == element));
 }
