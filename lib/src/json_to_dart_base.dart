@@ -123,6 +123,7 @@ String stringClassToDart({
   String toJson = '';
   String classMixin = '';
   String equatableProps = '';
+
   for (var field in classFromJson.classFieldsFromJson) {
     String fieldPrefix = getFieldPrefix(
         field: field, library: converterOptions.compatibleLibrary);
@@ -147,13 +148,16 @@ String stringClassToDart({
           '$params$paramPrefix ${converterOptions.requiredParams ? 'required ' : ''}this.${field.name},\n';
     }
   }
-  equatableProps = '''
+
+  equatableProps = converterOptions.equatable
+      ? '''
   @override
-  List<Object?> get props => [$equatableProps];''';
+  List<Object?> get props => [$equatableProps];'''
+      : '';
   //----------------------------
 
   constructor = '''
-${converterOptions.constConstructor ? 'const' : ''} ${converterOptions.factoryConstructor ? 'factory' : ''} ${classFromJson.className}(${(converterOptions.requiredParams || (converterOptions.compatibleLibrary != null && converterOptions.compatibleLibrary == CompatibleLibrary.freezed)) ? '{ ' : ''}
+${converterOptions.constConstructor ? 'const' : ''} ${converterOptions.factoryConstructor ? 'factory' : ''} ${classFromJson.className}${converterOptions.classNamePostfix}(${(converterOptions.requiredParams || (converterOptions.compatibleLibrary != null && converterOptions.compatibleLibrary == CompatibleLibrary.freezed)) ? '{ ' : ''}
                              $params
                           ${(converterOptions.requiredParams || (converterOptions.compatibleLibrary != null && converterOptions.compatibleLibrary == CompatibleLibrary.freezed)) ? '}' : ''}) ${converterOptions.compatibleLibrary == CompatibleLibrary.freezed ? '= _${classFromJson.className}' : ''};
 ''';
@@ -183,9 +187,11 @@ Map<String, dynamic> toJson() => _\$${classFromJson.className}ToJson(this);
         : '';
   }
 
+  fields = converterOptions.generateFields ? fields : '';
+
   String stringClass = ''' 
     $classAnnotation
-    ${converterOptions.isAbstract ? 'abstract' : ''} class ${classFromJson.className} ${converterOptions.superClass.isNotEmpty ? 'extends ${converterOptions.superClass}' : ''} ${converterOptions.mixins.isNotEmpty ? converterOptions.mixins : classMixin.isNotEmpty ? classMixin : ''}{
+    ${converterOptions.isAbstract ? 'abstract' : ''} class ${classFromJson.className}${converterOptions.classNamePostfix} ${converterOptions.superClass.isNotEmpty ? 'extends ${converterOptions.superClass}${converterOptions.superClassNamePostfix}' : ''} ${converterOptions.mixins.isNotEmpty ? converterOptions.mixins : classMixin.isNotEmpty ? classMixin : ''}{
                                           $fields
                                           $constructor
                                           

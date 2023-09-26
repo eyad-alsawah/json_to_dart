@@ -26,8 +26,11 @@ class ConverterOptions {
   final bool factoryConstructor;
   final bool constConstructor;
   final bool equatable;
+  final bool generateFields;
   final String mixins;
   final String superClass;
+  final String classNamePostfix;
+  final String superClassNamePostfix;
   final CompatibleLibrary? compatibleLibrary;
 
   ConverterOptions({
@@ -38,8 +41,11 @@ class ConverterOptions {
     this.factoryConstructor = false,
     this.constConstructor = false,
     this.equatable = false,
+    this.generateFields = false,
     this.mixins = '',
     this.superClass = '',
+    this.classNamePostfix = '',
+    this.superClassNamePostfix = '',
     this.compatibleLibrary,
   }) : assert(constConstructor && !finalFields,
             "Can't define a const constructor for a class with non-final fields.");
