@@ -128,7 +128,7 @@ String stringClassToDart({
     String fieldPrefix = getFieldPrefix(
         field: field, library: converterOptions.compatibleLibrary);
     fields =
-        '$fields$fieldPrefix ${converterOptions.finalFields ? 'final ' : ''}${field.type}${converterOptions.nullableParams ? '?' : ''} ${field.name};\n';
+        '$fields$fieldPrefix ${converterOptions.finalFields ? 'final ' : ''}${field.type}${fieldIsClass(fieldType: field.type) ? converterOptions.classNamePostfix : ''}${converterOptions.nullableParams ? '?' : ''} ${field.name};\n';
     String paramPrefix = getParamPrefix(
         field: field, library: converterOptions.compatibleLibrary);
 
@@ -138,7 +138,7 @@ String stringClassToDart({
           : fields;
       params = converterOptions.compatibleLibrary == CompatibleLibrary.freezed
           ? '$params $paramPrefix ${field.type} ${field.name},\n'
-          : '$params$paramPrefix ${converterOptions.requiredParams ? 'required ' : ''}this.${field.name},\n';
+          : '$params$paramPrefix ${converterOptions.requiredParams ? 'required ' : ''}${converterOptions.callSuperNotThis ? 'super' : 'this'}.${field.name},\n';
 
       if (converterOptions.equatable) {
         equatableProps += '${field.name},';
@@ -191,7 +191,7 @@ Map<String, dynamic> toJson() => _\$${classFromJson.className}ToJson(this);
 
   String stringClass = ''' 
     $classAnnotation
-    ${converterOptions.isAbstract ? 'abstract' : ''} class ${classFromJson.className}${converterOptions.classNamePostfix} ${converterOptions.superClass.isNotEmpty ? 'extends ${converterOptions.superClass}${converterOptions.superClassNamePostfix}' : ''} ${converterOptions.mixins.isNotEmpty ? converterOptions.mixins : classMixin.isNotEmpty ? classMixin : ''}{
+    ${converterOptions.isAbstract ? 'abstract' : ''} class ${classFromJson.className}${converterOptions.classNamePostfix} ${(converterOptions.superClass.isNotEmpty || converterOptions.extendSameClassWithPostFix) ? 'extends ${converterOptions.extendSameClassWithPostFix ? classFromJson.className : converterOptions.superClass}${converterOptions.superClassNamePostfix}' : ''} ${converterOptions.mixins.isNotEmpty ? converterOptions.mixins : classMixin.isNotEmpty ? classMixin : ''}{
                                           $fields
                                           $constructor
                                           
@@ -275,4 +275,9 @@ String getDefaultValueFromType({required String fieldType}) {
       defaultFieldValue = fieldType.contains('List') ? '[]' : 'null';
   }
   return defaultFieldValue;
+}
+
+bool fieldIsClass({required String fieldType}) {
+  return (['int, double, bool, dynamic, String']
+      .any((element) => fieldType != element));
 }
