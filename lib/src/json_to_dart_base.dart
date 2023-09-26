@@ -140,14 +140,16 @@ String stringClassToDart({
           : '$params$paramPrefix ${converterOptions.requiredParams ? 'required ' : ''}this.${field.name},\n';
 
       if (converterOptions.equatable) {
-        equatableProps += field.name;
+        equatableProps += '${field.name},';
       }
     } else {
       params =
           '$params$paramPrefix ${converterOptions.requiredParams ? 'required ' : ''}this.${field.name},\n';
     }
   }
-
+  equatableProps = '''
+  @override
+  List<Object?> get props => [$equatableProps];''';
   //----------------------------
 
   constructor = '''
