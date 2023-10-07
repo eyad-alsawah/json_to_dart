@@ -29,6 +29,7 @@ class ConverterOptions {
   final bool generateFields;
   final bool callSuperNotThis;
   final bool extendSameClassWithPostFix;
+
   final String mixins;
   final String superClass;
   final String classNamePostfix;
