@@ -130,7 +130,7 @@ String stringClassToDart({
         field: field, library: converterOptions.compatibleLibrary);
     fields =
         '$fields$fieldPrefix ${converterOptions.finalFields ? 'final ' : ''}${field.type}${fieldIsNotAClass(fieldType: field.type) ? '' : converterOptions.classNamePostfix}${converterOptions.nullableParams ? '?' : ''} ${field.name};\n';
-    superConstructor = '$superConstructor${field.name}: ${field.name}';
+    superConstructor = '$superConstructor${field.name}: ${field.name}, ';
     String paramPrefix = getParamPrefix(
         field: field, library: converterOptions.compatibleLibrary);
 
@@ -160,7 +160,7 @@ String stringClassToDart({
   constructor = '''
 ${converterOptions.constConstructor ? 'const' : ''} ${converterOptions.factoryConstructor ? 'factory' : ''} ${classFromJson.className}${converterOptions.classNamePostfix}(${(converterOptions.requiredParams || (converterOptions.compatibleLibrary != null && converterOptions.compatibleLibrary == CompatibleLibrary.freezed)) ? '{ ' : ''}
                              $params
-                          ${(converterOptions.requiredParams || (converterOptions.compatibleLibrary != null && converterOptions.compatibleLibrary == CompatibleLibrary.freezed)) ? '}' : ''}) ${converterOptions.passFieldsToSuperConstructor ? ':($superConstructor)' : converterOptions.compatibleLibrary == CompatibleLibrary.freezed ? '= _${classFromJson.className}${converterOptions.classNamePostfix}' : ''};
+                          ${(converterOptions.requiredParams || (converterOptions.compatibleLibrary != null && converterOptions.compatibleLibrary == CompatibleLibrary.freezed)) ? '}' : ''}) ${converterOptions.passFieldsToSuperConstructor ? ':super($superConstructor)' : converterOptions.compatibleLibrary == CompatibleLibrary.freezed ? '= _${classFromJson.className}${converterOptions.classNamePostfix}' : ''};
 ''';
 //----------------------------
   if (converterOptions.compatibleLibrary != null) {
