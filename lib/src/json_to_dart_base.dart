@@ -145,7 +145,7 @@ String stringClassToDart({
       }
     } else {
       params =
-          '$params$paramPrefix ${converterOptions.requiredParams ? 'required ' : ''}this.${field.name},\n';
+          '$params$paramPrefix ${converterOptions.requiredParams ? 'required ' : ''}${converterOptions.callSuperNotThis ? 'super.' : 'this.'}${field.name},\n';
     }
   }
 
