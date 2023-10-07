@@ -29,7 +29,8 @@ class ConverterOptions {
   final bool generateFields;
   final bool callSuperNotThis;
   final bool extendSameClassWithPostFix;
-
+  final bool declareFieldTypesInConstructor;
+  final bool passFieldsToSuperConstructor;
   final String mixins;
   final String superClass;
   final String classNamePostfix;
@@ -47,6 +48,8 @@ class ConverterOptions {
     this.generateFields = false,
     this.callSuperNotThis = false,
     this.extendSameClassWithPostFix = false,
+    this.declareFieldTypesInConstructor = false,
+    this.passFieldsToSuperConstructor = false,
     this.mixins = '',
     this.superClass = '',
     this.classNamePostfix = '',
