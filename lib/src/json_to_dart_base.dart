@@ -31,14 +31,13 @@ void convertJsonToDart(
   // the base directory of the dart/flutter project the package is imported in
   final String baseDirectory = Directory.current.path;
 
-  print(baseDirectory);
-  print("Enter input file name: ");
+  ColoredPrinter.printColored("Enter input file name: ", AnsiColor.yellow);
   final String inputFileName = stdin.readLineSync() ?? 'input.json';
 
-  print("Enter output file name: ");
+  ColoredPrinter.printColored("Enter output file name: ", AnsiColor.yellow);
   final String outputFileName = stdin.readLineSync() ?? 'output.dart';
 
-  print("Enter base class name: ");
+  ColoredPrinter.printColored("Enter base class name: ", AnsiColor.yellow);
   final String baseClassName = stdin.readLineSync() ?? 'BaseClass';
 
   final Stopwatch stopwatch = Stopwatch()..start();
